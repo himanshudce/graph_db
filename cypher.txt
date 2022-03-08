@@ -1,0 +1,81 @@
+To create data from xml
+chmod +x XMLToCSV.py
+./XMLToCSV.py --annotate --neo4j dblp.xml dblp.dtd data_org/output.csv --relations author:authored_by journal:published_in publisher:published_by school:submitted_at editor:edited_by cite:has_citation series:is_part_of
+
+
+
+
+
+
+
+
+
+
+To delete nodes
+match (n:school) delete n;
+
+
+
+
+
+
+
+for author
+LOAD CSV WITH HEADERS FROM 'file:/SDM_lab1/final_data/output_author.csv' as row FIELDTERMINATOR ';' CREATE (:author {id:row.ID, name: row.author}) return row.author;
+Id, authorname
+
+
+
+
+for articles
+
+- ID, author, publisher, title, volume, year
+
+LOAD CSV WITH HEADERS FROM 'file:/SDM_lab1/final_data/article.csv' as row FIELDTERMINATOR ';' CREATE (:article {id:row.ID, author_names: row.author,publisher:row.publisher, title:row.title, volume:row.volume, year:row.year}) return row.title;
+
+
+
+
+
+
+
+make_relations
+LOAD CSV WITH HEADERS FROM 'file:/SDM_lab1/final_data/output_author_authored_by.csv' as row FIELDTERMINATOR ';'
+MATCH (art:article {id: row.START_ID}),(auth:author {id: row.END_ID})
+CREATE (auth)-[:is_author_of]->(art)
+
+
+
+
+
+
+///Extra
+LOAD CSV WITH HEADERS FROM 'http://localhost:11001/project-2aaa90a6-9ff2-437b-960f-e170f1a570de/small.csv' AS row FIELDTERMINATOR ';'
+with toInteger( row.id ) AS ID,
+split(row.list_name, '|') AS names
+RETURN ID, names
+LIMIT 3;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
