@@ -1,37 +1,31 @@
 from config.Neo_connect import Neo4jConnection
 import pandas as pd
-
-# define username and password
-USER = "himanshudce"
-PASSWORD = "Qwe@1997"
-DATABASE = "publicationdb"
+import config.db_settings as db_config
 
 # stablish connection with neo4j
-conn = Neo4jConnection(uri="bolt://localhost:7687", user=USER, pwd=PASSWORD)
+conn = Neo4jConnection(uri="bolt://localhost:7687", user=db_config.USER, pwd=db_config.PASSWORD)
 
 
 q1 = '''
 '''
 
-result = conn.query(q1, db=DATABASE)
+result = conn.query(q1, db=db_config.DATABASE)
 print(result)
 
 q2 = '''
 '''
-result = conn.query(q2, db=DATABASE)
+result = conn.query(q2, db=db_config.DATABASE)
 print(result)
 
 q3 = '''
 
 '''
-result = conn.query(q3, db=DATABASE)
+result = conn.query(q3, db=db_config.DATABASE)
 print(result)
 
 
 q4 = '''
 
 '''
-result = conn.query(q4, db=DATABASE)
+result = conn.query(q4, db=db_config.DATABASE)
 print(result)
-
-
