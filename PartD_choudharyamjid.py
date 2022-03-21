@@ -100,16 +100,18 @@ result3_b = conn.query(q3_b, db=db_config.DATABASE)
 # top comm authors
 q4_a = '''
 match (rc:research_community{name:"Design"})-[:top_comm_papers]-(art:article)<-[:is_author_of]-(aut:author)
-merge (rc)-[:top_comm_authors{type:"reviewers"}]->(aut)
-return rc, aut'''
-q4_b = '''
-match (rc:research_community{name:"Design"})-[:top_comm_papers]-(art:article)<-[:is_author_of]-(aut:author) 
-with rc, aut as gurus, count(art) as total_pub_art where count(art)>2
-merge (rc)-[:top_comm_authors{type:"gurus"}]->(gurus)
-return rc, gurus, total_pub_art'''
+with rc, aut as reviewer, count(art) as total_pub_art
+with rc, reviewer, case when total_pub_art<2 then "reviewer" else "guru" end as rtype
+merge (rc)-[:top_comm_authors{type:rtype}]->(reviewer)
+return rc, reviewer, rtype'''
+# q4_b = '''
+# match (rc:research_community{name:"Design"})-[:top_comm_papers]-(art:article)<-[:is_author_of]-(aut:author) 
+# with rc, aut as gurus, count(art) as total_pub_art where count(art)>2
+# merge (rc)-[:top_comm_authors{type:"gurus"}]->(gurus)
+# return rc, gurus, total_pub_art'''
 
 result4_a = conn.query(q4_a, db=db_config.DATABASE)
-result4_b = conn.query(q4_b, db=db_config.DATABASE)
+# result4_b = conn.query(q4_b, db=db_config.DATABASE)
 
 print("the top community authors are ")
 for i in result4_a:
@@ -117,6 +119,6 @@ for i in result4_a:
 
 
 
-print("the top community gurus are ")
-for i in result4_b:
-    print(i.data())
+# print("the top community gurus are ")
+# for i in result4_b:
+#     print(i.data())
