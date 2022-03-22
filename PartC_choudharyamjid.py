@@ -34,6 +34,19 @@ print(df)
 #---------------------------------------------------------------
 # shortest path algoritham
 query_shortest_path = ''' 
+CALL gds.graph.create(
+  'Betweenness',
+  'article',
+  'has_cited'
+)
+YIELD
+  graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
+CALL gds.betweenness.stream('Betweenness')
+YIELD nodeId, score
+with gds.util.asNode(nodeId) AS name, score
+ORDER BY score DESC
+match (name)-[:has]->(k:Keyword)
+return name.title, collect(k.name)
 '''
 
 result_shpath =  conn.query(query_shortest_path, db='publicationdb')

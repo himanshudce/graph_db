@@ -7,7 +7,7 @@ conn = Neo4jConnection(uri="bolt://localhost:7687", user=db_config.USER, pwd=db_
 
 
 q1 = '''
-MATCH (a:article)-[:has_cited]->(c:article)-[:is_published_in]->(p:publisher{type:'Conference Paper'}) 
+MATCH (a:article)-[:has_cited]->(c:article)-[:is_published_in]->(p:conference) 
 with p,c,count(*) as cited order by p,cited DESC 
 with p, collect([c,cited]) as cite_count 
 RETURN p.title as coference_name,
@@ -21,9 +21,8 @@ print(result)
 
 
 q2 = '''
-MATCH (ar:author)-[:is_author_of]->(a:article)-[ip:is_published_in]->(p:publisher{type:'Conference Paper'})
-WITH ar,p, count(distinct(ip.year)) AS co 
-WHERE co>=2 
+MATCH (ar:author)-[:is_author_of]->(a:article)-[ip:is_published_in]->(p:conference)
+WITH ar,p, count(distinct(ip.year)) AS co WHERE co>=2 
 with p,collect(DISTINCT(ar.id)) as community                            
 RETURN p.id as conference_id,community
 '''
@@ -31,20 +30,26 @@ result = conn.query(q2, db=db_config.DATABASE)
 print(result)
 
 
+
+
+
+
 q3 = '''
-MATCH (a:article)-[hc:has_cited]->(ar)-[ip:is_published_in]->(p:publisher{type:'Journal'})
+MATCH (a:article)-[hc:has_cited]->(ar)-[ip:is_published_in]->(p:journal)
 with p,hc.year as y1,count(a) as cite
-MATCH (ar:article)-[ip:is_published_in]->(p)
-where toInteger(ip.year) = toInteger(y1)-1
+MATCH (ar:article)-[ip:is_published_in]->(p) where toInteger(ip.year) = toInteger(y1)-1
 with p, y1, cite, count(ar) as publish1
-MATCH (ar:article)-[ip:is_published_in]->(p)
-where toInteger(ip.year) = toInteger(y1)-2
+MATCH (ar:article)-[ip:is_published_in]->(p) where toInteger(ip.year) = toInteger(y1)-2
 with p, y1, cite, publish1, count(ar) as publish2
 with p, avg(cite/(publish1+publish2)) as journal_index
-return p.title as journal_name,journal_index order by journal_index desc
-'''
+return p.title as journal_name,journal_index order by journal_index desc'''
+
+
 result = conn.query(q3, db=db_config.DATABASE)
 print(result)
+
+
+
 
 
 q4 = '''

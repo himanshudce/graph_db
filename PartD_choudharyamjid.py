@@ -37,9 +37,9 @@ result1_b = conn.query(q1_b, db=db_config.DATABASE)
 # divide and check 90% constraint
 
 q2 = '''
-match (a:article) -[r:is_published_in] -> (p:publisher)
+match (a:article) -[r:is_published_in] -> (p)
 with p as pub, count(*) as all_papers_cnt
-match (rc:research_community)-[:has_kewords]->(k:Keyword)<-[:has]-(a:article)-[r:is_published_in] -> (p2:publisher)
+match (rc:research_community)-[:has_kewords]->(k:Keyword)<-[:has]-(a:article)-[r:is_published_in] -> (p2)
 where pub.id = p2.id and rc.name="Design"
 with rc,pub, pub.title as title, all_papers_cnt, count(a) as total_cm_papers
 with rc,pub, pub.title as title, all_papers_cnt,total_cm_papers,(1.0*total_cm_papers/all_papers_cnt)*100 as persentage_belonging
@@ -63,18 +63,16 @@ result2 = conn.query(q2, db=db_config.DATABASE)
 
 q3_a = '''CALL gds.graph.create.cypher(
   'recomm_graph',
-  'match (rc:research_community)-[:community_publisher]->(p:publisher)<-[:is_published_in]-(a1:article)
+  'match (rc:research_community)-[:community_publisher]->(p)<-[:is_published_in]-(a1:article)
 where rc.name="Design" return distinct id(a1) as id',
-'match (rc:research_community)-[:community_publisher]->(p:publisher)<-[:is_published_in]-(a1:article)
+'match (rc:research_community)-[:community_publisher]->(p)<-[:is_published_in]-(a1:article)
 where rc.name="Design"
 match (rc)-[:community_publisher]->(p)<-[:is_published_in]-(a2:article)
 match (a1)-[:has_cited]->(a2)
 return id(a1) as source ,id(a2) as target'
 )
-YIELD 
-    graphName AS graph, nodeQuery, nodeCount AS nodes, relationshipQuery, relationshipCount AS rels
+YIELD graphName AS graph, nodeQuery, nodeCount AS nodes, relationshipQuery, relationshipCount AS rels
 '''
-
 q3_b = '''
 CALL gds.pageRank.stream('recomm_graph')
 YIELD nodeId,score

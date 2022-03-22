@@ -36,7 +36,10 @@ LOAD CSV WITH HEADERS FROM 'file:/SDM_lab1/kaggle_data_processed/authors.csv' as
 LOAD CSV WITH HEADERS FROM 'file:/SDM_lab1/kaggle_data_processed/articles.csv' as row FIELDTERMINATOR ',' CREATE (:article {id:row.ID, title:row.title, DOI:row.DOI}) return row.title;
 ''',
 '''
-LOAD CSV WITH HEADERS FROM 'file:/SDM_lab1/kaggle_data_processed/publications.csv' as row FIELDTERMINATOR ',' CREATE (:publisher {id:row.ID, title:row.name, type:row.Type}) return row.name;
+LOAD CSV WITH HEADERS FROM 'file:/SDM_lab1/kaggle_data_processed/conference.csv' as row FIELDTERMINATOR ',' CREATE (:conference {id:row.ID, title:row.name, type:row.Type}) return row.name;
+''',
+'''
+LOAD CSV WITH HEADERS FROM 'file:/SDM_lab1/kaggle_data_processed/journal.csv' as row FIELDTERMINATOR ',' CREATE (:journal {id:row.ID, title:row.name, type:row.Type}) return row.name;
 ''',
 '''
 LOAD CSV WITH HEADERS FROM 'file:/SDM_lab1/kaggle_data_processed/concepts.csv' as row FIELDTERMINATOR ',' CREATE (:Keyword {id:row.ID, name: row.name}) return row.name;
@@ -61,9 +64,12 @@ MATCH (auth:author {id: row.author_ID}),(art:article {id: row.article_ID})
 CREATE (auth)-[r:is_author_of]->(art) return r
 ''',
 '''LOAD CSV WITH HEADERS FROM 'file:/SDM_lab1/kaggle_data_processed/article_published_by.csv' as row FIELDTERMINATOR ','
-MATCH (art:article {id: row.article_ID}),(publ:publisher {id: row.publisher_ID})
+MATCH (art:article {id: row.article_ID}),(publ:conference {id: row.publisher_ID})
 CREATE (art)-[r:is_published_in{year:row.year}]->(publ) return r''',
 
+'''LOAD CSV WITH HEADERS FROM 'file:/SDM_lab1/kaggle_data_processed/article_published_by.csv' as row FIELDTERMINATOR ','
+MATCH (art:article {id: row.article_ID}),(publ:journal {id: row.publisher_ID})
+CREATE (art)-[r:is_published_in{year:row.year, volume:"1"}]->(publ) return r'''
 '''
 LOAD CSV WITH HEADERS FROM 'file:/SDM_lab1/kaggle_data_processed/paper_cited_by.csv' as row FIELDTERMINATOR ','
 MATCH (art:article {id: row.article_ID}),(cite:article {id: row.cite_paper_ID})
